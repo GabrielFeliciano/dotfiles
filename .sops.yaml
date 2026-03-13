@@ -1,0 +1,8 @@
+keys:
+  - &gabriel age1mf7kcqn69qcd097d74d978rth3xux9fspedngpkghey8dyly3gls38q682
+
+creation_rules:
+  - path_regex: secrets/.*\.yaml$
+    key_groups:
+      - age:
+          - *gabriel
