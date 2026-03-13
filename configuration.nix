@@ -95,12 +95,18 @@ in
     { pkgs, config, ... }:
     {
       home = {
-        # file.".config" = {
-        #   source = ./dotfiles;
-        #   recursive = true;
-        #   force = true;
-        # };
         stateVersion = "25.05";
+      };
+
+      # Use impure path for neovim config - allows live editing without rebuild
+      xdg.configFile."nvim" = {
+        source = /home/gabriel/nixos-config/dotfiles/neovim;
+        recursive = true;
+      };
+
+      # Claude Code settings - pure Nix path (requires rebuild to update)
+      home.file.".claude/settings.json" = {
+        source = ./dotfiles/claude-settings.json;
       };
 
       services.dunst.enable = true;
@@ -296,3 +302,4 @@ in
     };
   };
 }
+
