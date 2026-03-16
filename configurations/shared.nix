@@ -48,6 +48,8 @@ in
     jq
 
     # both
+    nh
+    playerctl
     age
     aichat
     htop

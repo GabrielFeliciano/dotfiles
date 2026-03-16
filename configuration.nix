@@ -98,11 +98,8 @@ in
         stateVersion = "25.05";
       };
 
-      # Use impure path for neovim config - allows live editing without rebuild
-      xdg.configFile."nvim" = {
-        source = /home/gabriel/nixos-config/dotfiles/neovim;
-        recursive = true;
-      };
+      # Symlink neovim config - allows live editing without rebuild
+      xdg.configFile."nvim".source = config.lib.file.mkOutOfStoreSymlink "/home/gabriel/nixos-config/dotfiles/neovim";
 
       # Claude Code settings - pure Nix path (requires rebuild to update)
       home.file.".claude/settings.json" = {
@@ -120,6 +117,63 @@ in
 
         direnv = {
           enable = true;
+        };
+
+        tmux = {
+          enable = true;
+          mouse = true;
+          prefix = "C-Space";
+          baseIndex = 1;
+          keyMode = "vi";
+          sensibleOnTop = false;
+          plugins = with pkgs; [
+            {
+              plugin = tmuxPlugins.catppuccin;
+              extraConfig = ''
+                set -g @catppuccin_flavour 'mocha'
+              '';
+            }
+            tmuxPlugins.sensible
+            tmuxPlugins.vim-tmux-navigator
+            tmuxPlugins.yank
+          ];
+          extraConfig = ''
+            set-option -sa terminal-overrides ",xterm*:Tc"
+
+            # Vim style pane selection
+            bind h select-pane -L
+            bind j select-pane -D
+            bind k select-pane -U
+            bind l select-pane -R
+
+            # Pane base index
+            set -g pane-base-index 1
+            set-window-option -g pane-base-index 1
+            set-option -g renumber-windows on
+
+            # Use Alt-arrow keys without prefix key to switch panes
+            bind -n M-Left select-pane -L
+            bind -n M-Right select-pane -R
+            bind -n M-Up select-pane -U
+            bind -n M-Down select-pane -D
+
+            # Shift arrow to switch windows
+            bind -n S-Left  previous-window
+            bind -n S-Right next-window
+
+            # Shift Alt vim keys to switch windows
+            bind -n M-H previous-window
+            bind -n M-L next-window
+
+            # Vi copy-mode keybindings
+            bind-key -T copy-mode-vi v send-keys -X begin-selection
+            bind-key -T copy-mode-vi C-v send-keys -X rectangle-toggle
+            bind-key -T copy-mode-vi y send-keys -X copy-selection-and-cancel
+
+            # Split windows keeping current path
+            bind '"' split-window -v -c "#{pane_current_path}"
+            bind % split-window -h -c "#{pane_current_path}"
+          '';
         };
         bash = {
           enable = true;
@@ -207,10 +261,6 @@ in
     # };
 
     openvpn3.enable = true;
-
-    tmux = {
-      enable = true;
-    };
   };
 
   fonts.packages = with pkgs; [
