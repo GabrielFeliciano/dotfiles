@@ -2,8 +2,6 @@
   description = "A simple NixOS flake";
 
   inputs = {
-    home-manager.url = "github:nix-community/home-manager";
-
     agenix.url = "github:ryantm/agenix";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     agenix-cli.url = "github:ryantm/agenix";
@@ -17,7 +15,6 @@
 
   outputs =
     {
-      home-manager,
       nixpkgs,
       agenix,
       nix-vscode-extensions,
@@ -36,7 +33,6 @@
             ;
         };
         modules = [
-          home-manager.nixosModules.home-manager
           agenix.nixosModules.default
           sops-nix.nixosModules.sops
           ./configuration.nix

@@ -91,138 +91,35 @@ in
     ];
   };
 
-  home-manager.users.gabriel =
-    { pkgs, config, ... }:
-    {
-      home = {
-        stateVersion = "25.05";
-      };
+  # Symlink neovim config - allows live editing without rebuild
+  systemd.tmpfiles.rules = [
+    "L+ /home/gabriel/.config/nvim - - - - /home/gabriel/nixos-config/dotfiles/neovim"
+    "L+ /home/gabriel/.claude/settings.json - - - - ${./dotfiles/claude-settings.json}"
+  ];
 
-      # Symlink neovim config - allows live editing without rebuild
-      xdg.configFile."nvim".source = config.lib.file.mkOutOfStoreSymlink "/home/gabriel/nixos-config/dotfiles/neovim";
-
-      # Claude Code settings - pure Nix path (requires rebuild to update)
-      home.file.".claude/settings.json" = {
-        source = ./dotfiles/claude-settings.json;
-      };
-
-      services.dunst.enable = true;
-
-      programs = {
-        neovim = {
-          enable = true;
-          defaultEditor = true;
-          extraPackages = profileNeovimPackages;
-        };
-
-        direnv = {
-          enable = true;
-        };
-
-        tmux = {
-          enable = true;
-          mouse = true;
-          prefix = "C-Space";
-          baseIndex = 1;
-          keyMode = "vi";
-          sensibleOnTop = false;
-          plugins = with pkgs; [
-            {
-              plugin = tmuxPlugins.catppuccin;
-              extraConfig = ''
-                set -g @catppuccin_flavour 'mocha'
-              '';
-            }
-            tmuxPlugins.sensible
-            tmuxPlugins.vim-tmux-navigator
-            tmuxPlugins.yank
-          ];
-          extraConfig = ''
-            set-option -sa terminal-overrides ",xterm*:Tc"
-
-            # Vim style pane selection
-            bind h select-pane -L
-            bind j select-pane -D
-            bind k select-pane -U
-            bind l select-pane -R
-
-            # Pane base index
-            set -g pane-base-index 1
-            set-window-option -g pane-base-index 1
-            set-option -g renumber-windows on
-
-            # Use Alt-arrow keys without prefix key to switch panes
-            bind -n M-Left select-pane -L
-            bind -n M-Right select-pane -R
-            bind -n M-Up select-pane -U
-            bind -n M-Down select-pane -D
-
-            # Shift arrow to switch windows
-            bind -n S-Left  previous-window
-            bind -n S-Right next-window
-
-            # Shift Alt vim keys to switch windows
-            bind -n M-H previous-window
-            bind -n M-L next-window
-
-            # Vi copy-mode keybindings
-            bind-key -T copy-mode-vi v send-keys -X begin-selection
-            bind-key -T copy-mode-vi C-v send-keys -X rectangle-toggle
-            bind-key -T copy-mode-vi y send-keys -X copy-selection-and-cancel
-
-            # Split windows keeping current path
-            bind '"' split-window -v -c "#{pane_current_path}"
-            bind % split-window -h -c "#{pane_current_path}"
-          '';
-        };
-        bash = {
-          enable = true;
-          bashrcExtra = ''
-            eval "$(mise activate bash)";
-            export ANTHROPIC_API_KEY="$(cat /run/secrets/anthropic_api_key)";
-            export MANPAGER="nvim -c 'Man!' -"
-
-            nv() {
-              nvim . ;
-            }
-
-            nixrebuild() {
-              sudo nixos-rebuild switch;
-            }
-
-            nvnix() {
-              nvim ~/nixos-config/;
-            }
-
-            #if command -v tmux &> /dev/null && [ -z "$TMUX" ]; then
-            #  tmux attach-session -t default || tmux new-session -s default
-            #fi
-          '';
-        };
-        zoxide = {
-          enable = true;
-          enableBashIntegration = true;
-        };
-        git = {
-          enable = true;
-          userName = "GabrielFeliciano";
-          userEmail = "gabriel.feliciano@olhonocarro.com.br";
-          extraConfig = {
-            init.defaultBranch = "main";
-            pull.rebase = true;
-            push.autoSetupRemote = true;
-            push.default = "simple";
-            rerere.enabled = true;
-            branch.sort = "-committerdate";
-            core.autocrlf = false;
-            diff.colorMoved = "default";
-          };
-        };
-      };
-    };
+  environment.etc."gitconfig".text = ''
+    [user]
+      name = GabrielFeliciano
+      email = gabriel.feliciano@olhonocarro.com.br
+    [init]
+      defaultBranch = main
+    [pull]
+      rebase = true
+    [push]
+      autoSetupRemote = true
+      default = simple
+    [rerere]
+      enabled = true
+    [branch]
+      sort = -committerdate
+    [core]
+      autocrlf = false
+    [diff]
+      colorMoved = default
+  '';
 
   environment = {
-    systemPackages = profilePackages;
+    systemPackages = profilePackages ++ profileNeovimPackages ++ [ pkgs.dunst ];
     variables = {
       XDG_CURRENT_DESKTOP = "GNOME";
       DONT_PROMPT_WSL_INSTALL = "1";
@@ -232,6 +129,90 @@ in
   };
 
   programs = {
+    neovim = {
+      enable = true;
+      defaultEditor = true;
+      vimAlias = true;
+      viAlias = true;
+    };
+
+    direnv.enable = true;
+
+    tmux = {
+      enable = true;
+      plugins = with pkgs.tmuxPlugins; [
+        catppuccin
+        sensible
+        vim-tmux-navigator
+        yank
+      ];
+      extraConfig = ''
+        set -g @catppuccin_flavour 'mocha'
+        set -g mouse on
+        set -g prefix C-Space
+        unbind C-b
+        bind C-Space send-prefix
+        set -g base-index 1
+        set -g pane-base-index 1
+        set-window-option -g pane-base-index 1
+        set-option -g renumber-windows on
+        set-window-option -g mode-keys vi
+        set-option -sa terminal-overrides ",xterm*:Tc"
+
+        # Vim style pane selection
+        bind h select-pane -L
+        bind j select-pane -D
+        bind k select-pane -U
+        bind l select-pane -R
+
+        # Use Alt-arrow keys without prefix key to switch panes
+        bind -n M-Left select-pane -L
+        bind -n M-Right select-pane -R
+        bind -n M-Up select-pane -U
+        bind -n M-Down select-pane -D
+
+        # Shift arrow to switch windows
+        bind -n S-Left  previous-window
+        bind -n S-Right next-window
+
+        # Shift Alt vim keys to switch windows
+        bind -n M-H previous-window
+        bind -n M-L next-window
+
+        # Vi copy-mode keybindings
+        bind-key -T copy-mode-vi v send-keys -X begin-selection
+        bind-key -T copy-mode-vi C-v send-keys -X rectangle-toggle
+        bind-key -T copy-mode-vi y send-keys -X copy-selection-and-cancel
+
+        # Split windows keeping current path
+        bind '"' split-window -v -c "#{pane_current_path}"
+        bind % split-window -h -c "#{pane_current_path}"
+      '';
+    };
+
+    bash.interactiveShellInit = ''
+      eval "$(mise activate bash)";
+      export ANTHROPIC_API_KEY="$(cat /run/secrets/anthropic_api_key)";
+      export MANPAGER="nvim -c 'Man!' -"
+
+      nv() {
+        nvim . ;
+      }
+
+      nixrebuild() {
+        sudo nixos-rebuild switch;
+      }
+
+      nvnix() {
+        nvim ~/nixos-config/;
+      }
+    '';
+
+    zoxide = {
+      enable = true;
+      enableBashIntegration = true;
+    };
+
     steam = {
       enable = true;
       remotePlay.openFirewall = true;
