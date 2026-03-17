@@ -49,6 +49,7 @@ in
 
     # both
     nh
+    nix-search
     playerctl
     age
     aichat
@@ -56,7 +57,6 @@ in
     claude-code-patched
     unar
     obsidian
-    alacritty
     pavucontrol
     google-chrome
     stow

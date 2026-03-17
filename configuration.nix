@@ -136,6 +136,11 @@ in
       viAlias = true;
     };
 
+    alacritty = {
+      enable = true;
+      settings.general.import = [ pkgs.alacritty-theme.catppuccin_mocha ];
+    };
+
     direnv.enable = true;
 
     tmux = {
@@ -333,4 +338,3 @@ in
     };
   };
 }
-

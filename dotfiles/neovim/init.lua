@@ -30,10 +30,8 @@ local deps = {
     source = "folke/zen-mode.nvim",
   },
   {
-    source = "scottmckendry/cyberdream.nvim",
-    depends = {
-      "echasnovski/mini.icons",
-    },
+    source = "catppuccin/nvim",
+    name = "catppuccin",
   },
   {
     source = "olimorris/persisted.nvim",
@@ -191,13 +189,11 @@ later(function()
 end)
 
 later(function()
-  require("cyberdream").setup({
-    options = {
-      theme = "auto",
-    },
+  require("catppuccin").setup({
+    flavour = "mocha",
   })
 
-  vim.cmd("colorscheme cyberdream")
+  vim.cmd("colorscheme catppuccin")
 end)
 
 later(function()
