@@ -8,6 +8,18 @@
 }:
 
 let
+  seshSwitch = pkgs.writeShellScript "sesh-switch" ''
+    sesh connect "$(fzf \
+      --no-sort --ansi \
+      --border-label ' sesh ' \
+      --prompt '⚡  ' \
+      --bind 'start:reload(sesh list -z)' \
+      --bind 'ctrl-t:change-prompt(🪟  )+reload(sesh list -t)' \
+      --bind 'ctrl-x:change-prompt(📁  )+reload(sesh list -z)' \
+      --bind 'ctrl-d:execute(tmux kill-session -t {})+reload(sesh list -z)' \
+    )"
+  '';
+
   profiles = [
     "personal"
     "shared"
@@ -119,6 +131,20 @@ in
   '';
 
   environment = {
+    etc."xdg/alacritty/alacritty.toml".text = ''
+      [general]
+      import = ["${pkgs.alacritty-theme.catppuccin_mocha}"]
+
+      [terminal.shell]
+      program = "tmux"
+      args = ["new-session"]
+
+      [[keyboard.bindings]]
+      key = "Return"
+      mods = "Shift"
+      chars = "\u001b\r"
+    '';
+
     systemPackages = profilePackages ++ profileNeovimPackages ++ [ pkgs.dunst ];
     variables = {
       XDG_CURRENT_DESKTOP = "GNOME";
@@ -136,11 +162,11 @@ in
       viAlias = true;
     };
 
-    alacritty = {
-      enable = true;
-      settings.general.import = [ pkgs.alacritty-theme.catppuccin_mocha ];
-    };
-
+    # alacritty = {
+    #   enable = true;
+    #   settings.general.import = [ pkgs.alacritty-theme.catppuccin_mocha ];
+    # };
+    #
     direnv.enable = true;
 
     tmux = {
@@ -176,6 +202,11 @@ in
         bind -n M-Up select-pane -U
         bind -n M-Down select-pane -D
 
+        bind -r H resize-pane -L 5
+        bind -r J resize-pane -D 5
+        bind -r K resize-pane -U 5
+        bind -r L resize-pane -R 5
+
         # Shift arrow to switch windows
         bind -n S-Left  previous-window
         bind -n S-Right next-window
@@ -192,12 +223,15 @@ in
         # Split windows keeping current path
         bind '"' split-window -v -c "#{pane_current_path}"
         bind % split-window -h -c "#{pane_current_path}"
+
+        # sesh session switcher
+        bind f display-popup -E "${seshSwitch}"
       '';
     };
 
     bash.interactiveShellInit = ''
       eval "$(mise activate bash)";
-      export ANTHROPIC_API_KEY="$(cat /run/secrets/anthropic_api_key)";
+      #export ANTHROPIC_API_KEY="$(cat /run/secrets/anthropic_api_key)";
       export MANPAGER="nvim -c 'Man!' -"
 
       nv() {
@@ -280,6 +314,10 @@ in
     xserver = {
       enable = true;
       dpi = 96;
+
+      displayManager.setupCommands = ''
+        ${pkgs.xorg.xrandr}/bin/xrandr --output HDMI-0 --mode 1920x1080
+      '';
 
       xkb = {
         layout = "us";

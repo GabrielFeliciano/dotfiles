@@ -2,6 +2,7 @@
   description = "A simple NixOS flake";
 
   inputs = {
+    alacritty-theme.url = "github:alexghr/alacritty-theme.nix";
     agenix.url = "github:ryantm/agenix";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     agenix-cli.url = "github:ryantm/agenix";
@@ -20,6 +21,7 @@
       nix-vscode-extensions,
       openaws-vpn-client,
       sops-nix,
+      alacritty-theme,
       ...
     }:
     {
@@ -33,6 +35,13 @@
             ;
         };
         modules = [
+          (
+            { config, pkgs, ... }:
+            {
+              # install the overlay
+              nixpkgs.overlays = [ alacritty-theme.overlays.default ];
+            }
+          )
           agenix.nixosModules.default
           sops-nix.nixosModules.sops
           ./configuration.nix

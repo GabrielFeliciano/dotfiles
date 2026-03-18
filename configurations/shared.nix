@@ -48,6 +48,8 @@ in
     jq
 
     # both
+    alacritty
+    sesh
     nh
     nix-search
     playerctl

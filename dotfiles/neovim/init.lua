@@ -24,12 +24,6 @@ local deps = {
     source = "shortcuts/no-neck-pain.nvim",
   },
   {
-    source = "pocco81/true-zen.nvim",
-  },
-  {
-    source = "folke/zen-mode.nvim",
-  },
-  {
     source = "catppuccin/nvim",
     name = "catppuccin",
   },
@@ -71,6 +65,9 @@ local deps = {
       "abeldekat/cmp-mini-snippets",
     },
   },
+  {
+    source = "christoomey/vim-tmux-navigator",
+  },
 }
 
 for _, dep in ipairs(deps) do
@@ -90,6 +87,16 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.cmd("wincmd L")
   end,
 })
+
+vim.keymap.set(
+  "n",
+  "<leader>d",
+  vim.diagnostic.open_float,
+  { desc = "Diagnostic float" }
+)
+vim.keymap.set({ "n", "v" }, "<leader>f", function()
+  require("conform").format({ bufnr = 0 })
+end, { desc = "Format buffer" })
 
 -- Setups
 
@@ -176,16 +183,34 @@ end)
 
 later(function()
   require("neogit").setup({
-    -- Cute neogit configuration 💖
     integrations = {
       diffview = true,
     },
     graph_style = "unicode",
   })
-  
-  vim.keymap.set("n", "<leader>g", "<cmd>Neogit<cr>", { desc = "Open Neogit 🌸" })
-  vim.keymap.set("n", "<leader>gc", "<cmd>Neogit commit<cr>", { desc = "Git commit 💖" })
-  vim.keymap.set("n", "<leader>gp", "<cmd>Neogit push<cr>", { desc = "Git push ✨" })
+
+  vim.keymap.set("n", "<leader>g", "<cmd>Neogit<cr>", { desc = "Open Neogit" })
+  vim.keymap.set(
+    "n",
+    "<leader>gc",
+    "<cmd>Neogit commit<cr>",
+    { desc = "Git commit" }
+  )
+  vim.keymap.set(
+    "n",
+    "<leader>gp",
+    "<cmd>Neogit push<cr>",
+    { desc = "Git push" }
+  )
+  vim.keymap.set(
+    "n",
+    "<leader>gb",
+    "<cmd>DiffviewFileHistory %<cr>",
+    { desc = "Git: file history" }
+  )
+  vim.keymap.set("n", "<leader>gh", function()
+    require("mini.diff").toggle_overlay(0)
+  end, { desc = "Git: toggle diff overlay" })
 end)
 
 later(function()
@@ -200,7 +225,7 @@ later(function()
   local NoNeckPain = require("no-neck-pain")
 
   NoNeckPain.setup({
-    width = 120,
+    width = 80,
   })
 
   vim.api.nvim_create_autocmd("User", {
@@ -247,16 +272,16 @@ later(function()
     return MiniPick.registry[chosen_picker_name]()
   end
 
+  vim.keymap.set("n", "<C-p>", useExtraPicker("git_files"))
+  vim.keymap.set("n", "<leader>pf", "<cmd>:Pick files<cr>")
+  vim.keymap.set("n", "<leader>ps", "<cmd>:Pick grep_live<cr>")
+  vim.keymap.set("n", "<leader>pb", "<cmd>:Pick buffers<cr>")
+  vim.keymap.set("n", "<leader>pp", "<cmd>:Pick registry<cr>")
   vim.keymap.set(
     "n",
-    "<leader>s",
+    "<leader>pws",
     useExtraPicker("lsp", { scope = "workspace_symbol" })
   )
-  -- vim.keymap.set("n", "<leader>f", MiniExtraPickers.)
-  vim.keymap.set("n", "<leader>pp", "<cmd>:Pick registry<cr>")
-  vim.keymap.set("n", "<c-space>", "<cmd>:Pick buffers<cr>")
-  vim.keymap.set("n", "<c-tab>", "<cmd>:Pick files<cr>")
-  vim.keymap.set("n", "<c-f>", "<cmd>:Pick grep_live<cr>")
 
   -- not working
   vim.keymap.set("n", "<leader>z", function()
@@ -379,6 +404,7 @@ later(function()
     triggers = {
       -- Leader triggers
       { mode = { "n", "x" }, keys = "<Leader>" },
+      { mode = "n", keys = "<leader>p" },
 
       -- `[` and `]` keys
       { mode = "n", keys = "[" },
@@ -500,29 +526,56 @@ later(function()
   vim.lsp.enable("biome")
 end)
 
-later(function()
-  require("avante").setup({
-    input = {
-      provider = "snacks",
-    },
-    provider = "claude-code",
-    mappings = {
-      toggle = {
-        default = "<C-t>",
-      },
-    },
-    acp_providers = {
-      ["claude-code"] = {
-        command = "claude-code-acp",
-        args = { "--permission-mode", "default" },
-        env = {
-          ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY"),
-        },
-      },
-    },
-  })
+-- later(function()
+--   require("avante").setup({
+--     input = {
+--       provider = "snacks",
+--     },
+--     provider = "claude-code",
+--     mappings = {
+--       toggle = {
+--         default = "<C-t>",
+--       },
+--     },
+--     acp_providers = {
+--       ["claude-code"] = {
+--         command = "claude-code-acp",
+--         args = { "--permission-mode", "default" },
+--         env = {
+--           ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY"),
+--         },
+--       },
+--     },
+--   })
+--
+--   vim.keymap.set({ "n", "i", "v" }, "<C-t>", function()
+--     require("avante.api").toggle()
+--   end, { desc = "Avante: toggle chat" })
+-- end)
 
-  vim.keymap.set({ "n", "i", "v" }, "<C-t>", function()
-    require("avante.api").toggle()
-  end, { desc = "Avante: toggle chat" })
+later(function()
+  vim.keymap.set(
+    { "n" },
+    "<C-h>",
+    "<cmd>TmuxNavigateLeft<cr>",
+    { desc = "window left" }
+  )
+  vim.keymap.set(
+    { "n" },
+    "<C-l>",
+    "<cmd>TmuxNavigateRight<cr>",
+    { desc = "window right" }
+  )
+  vim.keymap.set(
+    { "n" },
+    "<C-k>",
+    "<cmd>TmuxNavigateUp<cr>",
+    { desc = "window up" }
+  )
+  vim.keymap.set(
+    { "n" },
+    "<C-j>",
+    "<cmd>TmuxNavigateDown<cr>",
+    { desc = "window down" }
+  )
 end)
