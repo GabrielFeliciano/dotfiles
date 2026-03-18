@@ -45,7 +45,7 @@
           agenix.nixosModules.default
           sops-nix.nixosModules.sops
           ./configuration.nix
-          ./hardware-configuration.nix
+          /etc/nixos/hardware-configuration.nix
         ];
       };
     };

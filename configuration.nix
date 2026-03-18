@@ -43,6 +43,7 @@ let
 
   profilePackages = builtins.concatMap (p: p.packages or [ ]) importedProfiles;
   profileNeovimPackages = builtins.concatMap (p: p.neovimPackages or [ ]) importedProfiles;
+  profileServices = builtins.foldl' (acc: p: acc // (p.services or { })) { } importedProfiles;
 in
 
 {
@@ -254,8 +255,8 @@ in
 
     steam = {
       enable = true;
-      remotePlay.openFirewall = true;
-      dedicatedServer.openFirewall = true;
+      remotePlay.openFirewall = false;
+      dedicatedServer.openFirewall = false;
       protontricks.enable = true;
     };
     gamemode.enable = true;
@@ -338,12 +339,7 @@ in
       videoDrivers = [ "nvidia" ];
     };
 
-    xrdp = {
-      enable = true;
-      defaultWindowManager = "i3";
-      openFirewall = true;
-    };
-  };
+  } // profileServices;
 
   networking = {
     hostName = "nixos";
@@ -353,7 +349,7 @@ in
         networkmanager-openvpn
       ];
     };
-    firewall.enable = false;
+    firewall.enable = true;
   };
 
   time = {
