@@ -34,13 +34,13 @@ in
     xclip
     nixfmt-rfc-style
     ripgrep
+    vscode-js-debug
   ];
 
   packages = with pkgs; [
     # may remove
     gnumake42
     gcc
-    mise
     direnv
     fzf
     lsof

@@ -240,7 +240,7 @@ in
       }
 
       nixrebuild() {
-        sudo nixos-rebuild switch;
+        sudo nixos-rebuild switch --impure;
       }
 
       nvnix() {
@@ -339,7 +339,8 @@ in
       videoDrivers = [ "nvidia" ];
     };
 
-  } // profileServices;
+  }
+  // profileServices;
 
   networking = {
     hostName = "nixos";

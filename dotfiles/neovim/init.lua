@@ -68,6 +68,19 @@ local deps = {
   {
     source = "christoomey/vim-tmux-navigator",
   },
+  {
+    source = "mfussenegger/nvim-dap",
+  },
+  {
+    source = "rcarriga/nvim-dap-ui",
+    depends = {
+      "mfussenegger/nvim-dap",
+      "nvim-neotest/nvim-nio",
+    },
+  },
+  {
+    source = "theHamsta/nvim-dap-virtual-text",
+  },
 }
 
 for _, dep in ipairs(deps) do
@@ -90,7 +103,7 @@ vim.api.nvim_create_autocmd("FileType", {
 
 vim.keymap.set(
   "n",
-  "<leader>d",
+  "<leader>dd",
   vim.diagnostic.open_float,
   { desc = "Diagnostic float" }
 )
@@ -225,7 +238,7 @@ later(function()
   local NoNeckPain = require("no-neck-pain")
 
   NoNeckPain.setup({
-    width = 80,
+    width = 120,
   })
 
   vim.api.nvim_create_autocmd("User", {
@@ -552,6 +565,126 @@ end)
 --     require("avante.api").toggle()
 --   end, { desc = "Avante: toggle chat" })
 -- end)
+
+later(function()
+  local dap = require("dap")
+  local dapui = require("dapui")
+
+  -- vscode-js-debug adapter (installed via nix as vscode-js-debug, binary: js-debug)
+  dap.adapters["pwa-node"] = {
+    type = "server",
+    host = "localhost",
+    port = "${port}",
+    executable = {
+      command = "js-debug",
+      args = { "${port}" },
+    },
+  }
+
+  -- Derive a stable debug port from a directory path so every project always
+  -- gets the same inspector port — no manual management, no conflicts.
+  local function debug_port(path)
+    local hash = 0
+    for i = 1, #path do
+      hash = (hash * 31 + path:byte(i)) % 1000
+    end
+    return 9229 + hash -- range 9229–10228
+  end
+
+  local js_config = {
+    {
+      type = "pwa-node",
+      request = "launch",
+      name = "Launch file",
+      program = "${file}",
+      cwd = "${workspaceFolder}",
+    },
+    {
+      -- Attaches to the port derived from the current working directory.
+      -- Start the service with <leader>dn or <leader>dm and this will connect.
+      type = "pwa-node",
+      request = "attach",
+      name = "Attach (auto port for cwd)",
+      port = function()
+        return debug_port(vim.fn.getcwd())
+      end,
+      cwd = "${workspaceFolder}",
+    },
+    {
+      -- Fallback: manually enter a port if needed
+      type = "pwa-node",
+      request = "attach",
+      name = "Attach (enter port)",
+      port = function()
+        return tonumber(
+          vim.fn.input("Debug port: ", tostring(debug_port(vim.fn.getcwd())))
+        )
+      end,
+      cwd = "${workspaceFolder}",
+    },
+  }
+
+  dap.configurations.javascript = js_config
+  dap.configurations.typescript = js_config
+  dap.configurations.javascriptreact = js_config
+  dap.configurations.typescriptreact = js_config
+
+  dapui.setup()
+  require("nvim-dap-virtual-text").setup()
+
+  -- auto open/close UI with debug session
+  dap.listeners.after.event_initialized["dapui_config"] = dapui.open
+  dap.listeners.before.event_terminated["dapui_config"] = dapui.close
+  dap.listeners.before.event_exited["dapui_config"] = dapui.close
+
+  -- breakpoints & stepping
+  vim.keymap.set(
+    "n",
+    "<leader>db",
+    dap.toggle_breakpoint,
+    { desc = "DAP: toggle breakpoint" }
+  )
+  vim.keymap.set(
+    "n",
+    "<leader>dc",
+    dap.continue,
+    { desc = "DAP: continue / start" }
+  )
+  vim.keymap.set("n", "<leader>di", dap.step_into, { desc = "DAP: step into" })
+  vim.keymap.set("n", "<leader>do", dap.step_over, { desc = "DAP: step over" })
+  vim.keymap.set("n", "<leader>dO", dap.step_out, { desc = "DAP: step out" })
+  vim.keymap.set("n", "<leader>dq", dap.terminate, { desc = "DAP: terminate" })
+  vim.keymap.set("n", "<leader>du", dapui.toggle, { desc = "DAP: toggle UI" })
+
+  -- Launch current file in a tmux pane on its deterministic debug port.
+  -- Then attach with <leader>dc → "Attach (auto port for cwd)".
+  vim.keymap.set("n", "<leader>dn", function()
+    local file = vim.fn.expand("%:p")
+    local port = debug_port(vim.fn.getcwd())
+    vim.notify("Debug port: " .. port, vim.log.levels.INFO)
+    vim.fn.system(
+      "tmux split-window -h 'node --inspect="
+        .. port
+        .. " "
+        .. file
+        .. "; read'"
+    )
+  end, { desc = "DAP: run file in tmux pane" })
+
+  -- Launch npm run dev in a tmux pane on its deterministic debug port.
+  vim.keymap.set("n", "<leader>dm", function()
+    local cwd = vim.fn.getcwd()
+    local port = debug_port(cwd)
+    vim.notify("Debug port: " .. port, vim.log.levels.INFO)
+    vim.fn.system(
+      "tmux split-window -h -c '"
+        .. cwd
+        .. "' 'npm run dev --node-options=--inspect="
+        .. port
+        .. "; read'"
+    )
+  end, { desc = "DAP: npm run dev in tmux pane" })
+end)
 
 later(function()
   vim.keymap.set(
