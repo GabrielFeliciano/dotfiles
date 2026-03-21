@@ -60,6 +60,18 @@ later(function()
     },
     picker = {
       name = "telescope.nvim",
+      note_mappings = {
+        -- Create a new note from your query.
+        new = "<C-x>",
+        -- Insert a link to the selected note.
+        insert_link = "<C-l>",
+      },
+      tag_mappings = {
+        -- Add tag(s) to current note.
+        tag_note = "<C-x>",
+        -- Insert a tag at the current location.
+        insert_tag = "<C-l>",
+      },
     },
     attachments = {
       folder = "attachments",
@@ -87,11 +99,10 @@ later(function()
   require("snacks").setup()
 end)
 
--- doesnt work
 later(function()
   require("persisted").setup({
     autostart = true,
-    autoload = true,
+    autoload = false,
     on_autoload_no_session = function()
       vim.notify("No existing session to load.")
     end,
@@ -217,7 +228,21 @@ later(function()
 end)
 
 later(function()
-  require("mini.cmdline").setup()
+  require("noice").setup({
+    lsp = {
+      override = {
+        ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+        ["vim.lsp.util.stylize_markdown"] = true,
+        ["cmp.entry.get_documentation"] = true,
+      },
+    },
+    presets = {
+      bottom_search = true,
+      command_palette = true,
+      long_message_to_split = true,
+      lsp_doc_border = true,
+    },
+  })
 end)
 
 function minisetup()

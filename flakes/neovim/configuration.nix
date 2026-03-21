@@ -46,6 +46,8 @@ in
           telescope-nvim
           telescope-fzf-native-nvim
           catppuccin-nvim
+          noice-nvim
+          nui-nvim
           # git
           neogit
           diffview-nvim

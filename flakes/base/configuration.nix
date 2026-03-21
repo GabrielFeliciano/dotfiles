@@ -147,6 +147,7 @@
       lxappearance
       xdg-desktop-portal-gtk
       git
+      television
     ];
   };
 }

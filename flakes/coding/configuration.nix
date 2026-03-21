@@ -49,14 +49,18 @@ in
     };
   };
 
+  system.activationScripts.claudeSettings = {
+    text = ''
+      mkdir -p /home/gabriel/.claude
+      cp ${./claude-settings.json} /home/gabriel/.claude/settings.json
+      chown gabriel:users /home/gabriel/.claude/settings.json
+    '';
+  };
+
   fonts.packages = with pkgs; [
     font-awesome
     powerline-fonts
     powerline-symbols
-  ];
-
-  systemd.tmpfiles.rules = [
-    "L+ /home/gabriel/.claude/settings.json - - - - /home/gabriel/nixos-config/dotfiles/claude-settings.json"
   ];
 
   programs = {
@@ -154,6 +158,7 @@ in
       gh
       awscli2
       vault
+      gh-dash
     ])
     ++ [
       claude-code-patched
