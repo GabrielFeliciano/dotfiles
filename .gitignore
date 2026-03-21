@@ -1,4 +1,3 @@
 result
 secrets/*.dec.yaml
 age.key
-hardware-configuration.nix

@@ -78,6 +78,28 @@
         "type": "github"
       }
     },
+    "base": {
+      "locked": {
+        "path": "./flakes/base",
+        "type": "path"
+      },
+      "original": {
+        "path": "./flakes/base",
+        "type": "path"
+      },
+      "parent": []
+    },
+    "coding": {
+      "locked": {
+        "path": "./flakes/coding",
+        "type": "path"
+      },
+      "original": {
+        "path": "./flakes/coding",
+        "type": "path"
+      },
+      "parent": []
+    },
     "darwin": {
       "inputs": {
         "nixpkgs": [
@@ -398,14 +420,28 @@
         "type": "github"
       }
     },
+    "personal": {
+      "locked": {
+        "path": "./flakes/personal",
+        "type": "path"
+      },
+      "original": {
+        "path": "./flakes/personal",
+        "type": "path"
+      },
+      "parent": []
+    },
     "root": {
       "inputs": {
         "agenix": "agenix",
         "agenix-cli": "agenix-cli",
         "alacritty-theme": "alacritty-theme",
+        "base": "base",
+        "coding": "coding",
         "nix-vscode-extensions": "nix-vscode-extensions",
         "nixpkgs": "nixpkgs_4",
         "openaws-vpn-client": "openaws-vpn-client",
+        "personal": "personal",
         "sops-nix": "sops-nix"
       }
     },

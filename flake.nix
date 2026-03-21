@@ -12,6 +12,9 @@
     };
     openaws-vpn-client.url = "github:JonathanxD/openaws-vpn-client";
     sops-nix.url = "github:Mic92/sops-nix";
+    base.url = "path:./flakes/base";
+    coding.url = "path:./flakes/coding";
+    personal.url = "path:./flakes/personal";
   };
 
   outputs =
@@ -22,6 +25,9 @@
       openaws-vpn-client,
       sops-nix,
       alacritty-theme,
+      base,
+      coding,
+      personal,
       ...
     }:
     {
@@ -44,8 +50,10 @@
           )
           agenix.nixosModules.default
           sops-nix.nixosModules.sops
-          ./configuration.nix
-          /etc/nixos/hardware-configuration.nix
+          base.nixosModules.default
+          coding.nixosModules.default
+          personal.nixosModules.default
+          ./hardware-configuration.nix
         ];
       };
     };
