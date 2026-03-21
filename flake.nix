@@ -14,6 +14,7 @@
     sops-nix.url = "github:Mic92/sops-nix";
     base.url = "path:./flakes/base";
     coding.url = "path:./flakes/coding";
+    neovim.url = "path:./flakes/neovim";
     personal.url = "path:./flakes/personal";
   };
 
@@ -27,6 +28,7 @@
       alacritty-theme,
       base,
       coding,
+      neovim,
       personal,
       ...
     }:
@@ -52,6 +54,7 @@
           sops-nix.nixosModules.sops
           base.nixosModules.default
           coding.nixosModules.default
+          neovim.nixosModules.default
           personal.nixosModules.default
           ./hardware-configuration.nix
         ];

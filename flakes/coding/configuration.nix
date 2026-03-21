@@ -34,6 +34,7 @@ let
       ++ (with pkgs; [
         libseccomp
         stdenv.cc.cc.lib
+        alsa-lib
       ]);
     autoPatchelfIgnoreMissingDeps = [ "libc.musl-x86_64.so.1" ];
   });
@@ -55,18 +56,10 @@ in
   ];
 
   systemd.tmpfiles.rules = [
-    "L+ /home/gabriel/.config/nvim - - - - /home/gabriel/nixos-config/dotfiles/neovim"
     "L+ /home/gabriel/.claude/settings.json - - - - /home/gabriel/nixos-config/dotfiles/claude-settings.json"
   ];
 
   programs = {
-    neovim = {
-      enable = true;
-      defaultEditor = true;
-      vimAlias = true;
-      viAlias = true;
-    };
-
     direnv.enable = true;
 
     tmux = {
@@ -145,20 +138,6 @@ in
 
   environment.systemPackages =
     (with pkgs; [
-      # neovim LSP / tools
-      claude-code-acp
-      js-beautify
-      vtsls
-      typescript-language-server
-      nil
-      lua-language-server
-      stylua
-      biome
-      xclip
-      nixfmt-rfc-style
-      ripgrep
-      vscode-js-debug
-
       # work tools
       keepassxc
       doppler

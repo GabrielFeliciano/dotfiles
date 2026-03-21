@@ -1,6 +1,9 @@
 -- Plugins managed by NixOS (pkgs.vimPlugins) — no plugin manager needed
 vim.cmd("packloadall")
-local function later(fn) vim.schedule(fn) end
+local function later(fn)
+  local ok, err = pcall(fn)
+  if not ok then vim.notify(tostring(err), vim.log.levels.WARN) end
+end
 local function now(fn) fn() end
 
 -- config

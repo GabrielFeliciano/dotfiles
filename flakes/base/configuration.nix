@@ -64,6 +64,10 @@
 
   virtualisation.docker.enable = true;
 
+  environment.sessionVariables = {
+    SUDO_ASKPASS = "${pkgs.x11_ssh_askpass}/libexec/x11-ssh-askpass";
+  };
+
   services = {
     avahi = {
       enable = true;
