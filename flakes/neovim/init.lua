@@ -2,9 +2,13 @@
 vim.cmd("packloadall")
 local function later(fn)
   local ok, err = pcall(fn)
-  if not ok then vim.notify(tostring(err), vim.log.levels.WARN) end
+  if not ok then
+    vim.notify(tostring(err), vim.log.levels.WARN)
+  end
 end
-local function now(fn) fn() end
+local function now(fn)
+  fn()
+end
 
 -- config
 
@@ -154,23 +158,6 @@ later(function()
 end)
 
 later(function()
-  local NoNeckPain = require("no-neck-pain")
-
-  NoNeckPain.setup({
-    width = 120,
-  })
-
-  vim.api.nvim_create_autocmd("User", {
-    pattern = "MiniFilesExplorerClose",
-    callback = function()
-      NoNeckPain.enable()
-    end,
-  })
-
-  NoNeckPain.enable()
-end)
-
-later(function()
   local MiniTabLine = require("mini.tabline")
 
   MiniTabLine.setup()
@@ -200,10 +187,20 @@ later(function()
     builtin.find_files({
       prompt_title = "Switch Repository",
       cwd = repositoriesPath,
-      find_command = { "find", repositoriesPath, "-mindepth", "1", "-maxdepth", "1", "-type", "d" },
+      find_command = {
+        "find",
+        repositoriesPath,
+        "-mindepth",
+        "1",
+        "-maxdepth",
+        "1",
+        "-type",
+        "d",
+      },
       attach_mappings = function(_, map)
         map("i", "<CR>", function(prompt_bufnr)
-          local selection = require("telescope.actions.state").get_selected_entry()
+          local selection =
+            require("telescope.actions.state").get_selected_entry()
           require("telescope.actions").close(prompt_bufnr)
           vim.cmd("%bd|e#")
           vim.api.nvim_set_current_dir(selection.value)

@@ -89,6 +89,14 @@
     ];
   };
 
+  programs.bash.interactiveShellInit = ''
+    export MANPAGER="nvim -c 'Man!' -"
+
+    nixr() {
+      sudo nixos-rebuild switch;
+    }
+  '';
+
   environment = {
     etc."gitconfig".text = ''
       [user]
@@ -138,6 +146,7 @@
       gtk3
       lxappearance
       xdg-desktop-portal-gtk
+      git
     ];
   };
 }

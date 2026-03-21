@@ -51,29 +51,6 @@ later(function()
       -- Trigger completion at 2 chars.
       min_chars = 2,
     },
-    mappings = {
-      -- Overrides the 'gf' mapping to work on markdown/wiki links within your vault.
-      ["gf"] = {
-        action = function()
-          return require("obsidian").util.gf_passthrough()
-        end,
-        opts = { noremap = false, expr = true, buffer = true },
-      },
-      -- Toggle check-boxes.
-      ["<leader>ch"] = {
-        action = function()
-          return require("obsidian").util.toggle_checkbox()
-        end,
-        opts = { buffer = true },
-      },
-      -- Smart action depending on context, either follow link or toggle checkbox.
-      ["<cr>"] = {
-        action = function()
-          return require("obsidian").util.smart_action()
-        end,
-        opts = { buffer = true, expr = true },
-      },
-    },
     picker = {
       name = "telescope.nvim",
       note_mappings = {
@@ -90,8 +67,27 @@ later(function()
       },
     },
     attachments = {
-      img_folder = "attachments",
+      folder = "attachments",
     },
+    legacy_commands = false,
+  })
+
+  vim.api.nvim_create_autocmd("FileType", {
+    pattern = "markdown",
+    callback = function(ev)
+      -- Follow markdown/wiki links (overrides gf)
+      vim.keymap.set("n", "gf", function()
+        return require("obsidian").util.gf_passthrough()
+      end, { noremap = false, expr = true, buffer = ev.buf })
+      -- Toggle check-boxes
+      vim.keymap.set("n", "<leader>ch", function()
+        return require("obsidian").util.toggle_checkbox()
+      end, { buffer = ev.buf })
+      -- Smart action: follow link or toggle checkbox
+      vim.keymap.set("n", "<cr>", function()
+        return require("obsidian").util.smart_action()
+      end, { buffer = ev.buf, expr = true })
+    end,
   })
 end)
 
