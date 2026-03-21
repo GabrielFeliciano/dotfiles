@@ -46,7 +46,6 @@ in
           telescope-nvim
           telescope-fzf-native-nvim
           catppuccin-nvim
-          no-neck-pain-nvim
           # git
           neogit
           diffview-nvim

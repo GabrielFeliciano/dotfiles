@@ -146,22 +146,6 @@ later(function()
   vim.cmd("colorscheme catppuccin")
 end)
 
-later(function()
-  local NoNeckPain = require("no-neck-pain")
-
-  NoNeckPain.setup({
-    width = 120,
-  })
-
-  vim.api.nvim_create_autocmd("User", {
-    pattern = "MiniFilesExplorerClose",
-    callback = function()
-      NoNeckPain.enable()
-    end,
-  })
-
-  NoNeckPain.enable()
-end)
 
 later(function()
   local MiniTabLine = require("mini.tabline")
