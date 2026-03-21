@@ -38,12 +38,19 @@ local deps = {
     },
   },
   {
+    source = "nvim-telescope/telescope.nvim",
+    depends = {
+      "nvim-lua/plenary.nvim",
+      "nvim-telescope/telescope-fzf-native.nvim",
+    },
+  },
+  {
     source = "yetone/avante.nvim",
     depends = {
       "nvim-lua/plenary.nvim",
       "MunifTanjim/nui.nvim",
       --- The below dependencies are optional,
-      "nvim-mini/mini.pick",
+      "nvim-telescope/telescope.nvim",
       "hrsh7th/nvim-cmp",
       "ibhagwan/fzf-lua", -- for file_selector provider fzf
       "stevearc/dressing.nvim", -- for input provider dressing
@@ -159,7 +166,7 @@ later(function()
       },
     },
     picker = {
-      name = "mini.pick",
+      name = "telescope.nvim",
       note_mappings = {
         -- Create a new note from your query.
         new = "<C-x>",
@@ -264,67 +271,36 @@ later(function()
 end)
 
 later(function()
-  local MiniPick = require("mini.pick")
-  local MiniExtraPickers = require("mini.extra").pickers
+  local telescope = require("telescope")
+  local builtin = require("telescope.builtin")
 
-  local function useExtraPicker(pick, ...)
-    local args = { ... }
-    return function()
-      MiniExtraPickers[pick](unpack(args))
-    end
-  end
+  telescope.setup({})
+  telescope.load_extension("fzf")
 
-  MiniPick.registry.registry = function()
-    local items = vim.tbl_keys(MiniPick.registry)
-    table.sort(items)
-    local source = { items = items, name = "Registry", choose = function() end }
-    local chosen_picker_name = MiniPick.start({ source = source })
-    if chosen_picker_name == nil then
-      return
-    end
-    return MiniPick.registry[chosen_picker_name]()
-  end
+  vim.keymap.set("n", "<C-p>", builtin.git_files)
+  vim.keymap.set("n", "<leader>pf", builtin.find_files)
+  vim.keymap.set("n", "<leader>ps", builtin.live_grep)
+  vim.keymap.set("n", "<leader>pb", builtin.buffers)
+  vim.keymap.set("n", "<leader>pp", builtin.builtin)
+  vim.keymap.set("n", "<leader>pws", builtin.lsp_workspace_symbols)
 
-  vim.keymap.set("n", "<C-p>", useExtraPicker("git_files"))
-  vim.keymap.set("n", "<leader>pf", "<cmd>:Pick files<cr>")
-  vim.keymap.set("n", "<leader>ps", "<cmd>:Pick grep_live<cr>")
-  vim.keymap.set("n", "<leader>pb", "<cmd>:Pick buffers<cr>")
-  vim.keymap.set("n", "<leader>pp", "<cmd>:Pick registry<cr>")
-  vim.keymap.set(
-    "n",
-    "<leader>pws",
-    useExtraPicker("lsp", { scope = "workspace_symbol" })
-  )
-
-  -- not working
   vim.keymap.set("n", "<leader>z", function()
     local repositoriesPath = vim.fn.expand("~/repositories")
-    local availableRepositories = vim.fn.readdir(repositoriesPath)
-    local chosenRepoName =
-      MiniPick.start({ source = { items = availableRepositories } })
-    local chosenRepoPath = vim.fs.joinpath(repositoriesPath, chosenRepoName)
-    vim.cmd("%bd|e#")
-    vim.api.nvim_set_current_dir(chosenRepoPath)
-  end)
-
-  -- vim.keymap.set("n", "<leader>gb", MiniExtraPickers.)
-  -- vim.keymap.set("n", "<leader>gc", MiniExtraPickers.)
-
-  MiniPick.setup({
-    window = {
-      config = function()
-        local height = math.floor(0.618 * vim.o.lines)
-        local width = math.floor(0.618 * vim.o.columns)
-        return {
-          anchor = "NW",
-          height = height,
-          width = width,
-          row = math.floor(0.5 * (vim.o.lines - height)),
-          col = math.floor(0.5 * (vim.o.columns - width)),
-        }
+    builtin.find_files({
+      prompt_title = "Switch Repository",
+      cwd = repositoriesPath,
+      find_command = { "find", repositoriesPath, "-mindepth", "1", "-maxdepth", "1", "-type", "d" },
+      attach_mappings = function(_, map)
+        map("i", "<CR>", function(prompt_bufnr)
+          local selection = require("telescope.actions.state").get_selected_entry()
+          require("telescope.actions").close(prompt_bufnr)
+          vim.cmd("%bd|e#")
+          vim.api.nvim_set_current_dir(selection.value)
+        end)
+        return true
       end,
-    },
-  })
+    })
+  end)
 end)
 
 later(function()
