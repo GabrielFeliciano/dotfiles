@@ -2,20 +2,13 @@
   pkgs,
   agenix,
   openaws-vpn-client,
+  ai-jail,
   ...
 }:
 
 let
   seshSwitch = pkgs.writeShellScript "sesh-switch" ''
-    sesh connect "$(fzf \
-      --no-sort --ansi \
-      --border-label ' sesh ' \
-      --prompt '⚡  ' \
-      --bind 'start:reload(sesh list -z)' \
-      --bind 'ctrl-t:change-prompt(🪟  )+reload(sesh list -t)' \
-      --bind 'ctrl-x:change-prompt(📁  )+reload(sesh list -z)' \
-      --bind 'ctrl-d:execute(tmux kill-session -t {})+reload(sesh list -z)' \
-    )"
+    sesh connect "$(sesh list -z | tv)"
   '';
 
   claude-code-patched = pkgs.claude-code.overrideAttrs (old: {
@@ -41,14 +34,6 @@ let
 in
 
 {
-  sops = {
-    defaultSopsFile = ../../secrets/secrets.yaml;
-    age.keyFile = "/home/gabriel/.config/sops/age/keys.txt";
-    secrets.anthropic_api_key = {
-      owner = "gabriel";
-    };
-  };
-
   system.activationScripts.claudeSettings = {
     text = ''
       mkdir -p /home/gabriel/.claude
@@ -164,5 +149,6 @@ in
       claude-code-patched
       agenix.packages.${pkgs.system}.default
       openaws-vpn-client.defaultPackage.${pkgs.system}
+      ai-jail.packages.${pkgs.system}.default
     ];
 }

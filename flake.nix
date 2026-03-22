@@ -11,7 +11,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     openaws-vpn-client.url = "github:JonathanxD/openaws-vpn-client";
-    sops-nix.url = "github:Mic92/sops-nix";
     base.url = "path:./flakes/base";
     coding.url = "path:./flakes/coding";
     neovim.url = "path:./flakes/neovim";
@@ -24,7 +23,6 @@
       agenix,
       nix-vscode-extensions,
       openaws-vpn-client,
-      sops-nix,
       alacritty-theme,
       base,
       coding,
@@ -51,7 +49,6 @@
             }
           )
           agenix.nixosModules.default
-          sops-nix.nixosModules.sops
           base.nixosModules.default
           coding.nixosModules.default
           neovim.nixosModules.default

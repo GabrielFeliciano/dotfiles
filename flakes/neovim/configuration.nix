@@ -3,7 +3,7 @@
 let
   neovimTools = with pkgs; [
     git
-    fzf
+
     claude-code-acp
     js-beautify
     vtsls
@@ -44,7 +44,7 @@ in
           lazydev-nvim
           # ui / navigation
           telescope-nvim
-          telescope-fzf-native-nvim
+
           catppuccin-nvim
           noice-nvim
           nui-nvim

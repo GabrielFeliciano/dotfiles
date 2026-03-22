@@ -167,7 +167,12 @@ later(function()
 
   telescope.setup({})
 
-  vim.keymap.set("n", "<C-p>", builtin.git_files)
+  vim.keymap.set("n", "<C-p>", function()
+    local ok = pcall(builtin.git_files)
+    if not ok then
+      builtin.find_files()
+    end
+  end)
   vim.keymap.set("n", "<leader>pf", builtin.find_files)
   vim.keymap.set("n", "<leader>ps", builtin.live_grep)
   vim.keymap.set("n", "<leader>pb", builtin.buffers)

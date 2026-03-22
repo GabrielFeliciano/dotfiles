@@ -60,24 +60,7 @@
   };
 
   environment = {
-    etc."xdg/alacritty/alacritty.toml".text = ''
-      [general]
-      import = ["${pkgs.alacritty-theme.catppuccin_mocha}"]
-
-      [terminal.shell]
-      program = "tmux"
-      args = ["new-session"]
-
-      [[keyboard.bindings]]
-      key = "Return"
-      mods = "Shift"
-      chars = "\u001b\r"
-    '';
-
     variables = {
-      XDG_CURRENT_DESKTOP = "GNOME";
-      DONT_PROMPT_WSL_INSTALL = "1";
-      GSETTINGS_SCHEMA_DIR = "${pkgs.gtk3}/share/gsettings-schemas/${pkgs.gtk3.name}/glib-2.0/schemas";
       VSCODE_EXTENSIONS = "/home/gabriel/.vscode-extensions";
     };
 

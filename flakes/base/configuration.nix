@@ -62,7 +62,12 @@
     firewall.enable = true;
   };
 
-  virtualisation.docker.enable = true;
+  virtualisation.docker = {
+    enable = true;
+    daemon.settings = {
+      experimental = true;
+    };
+  };
 
   environment.sessionVariables = {
     SUDO_ASKPASS = "${pkgs.x11_ssh_askpass}/libexec/x11-ssh-askpass";
@@ -98,30 +103,46 @@
   '';
 
   environment = {
-    etc."gitconfig".text = ''
-      [user]
-        name = GabrielFeliciano
-        email = gabriel.feliciano@olhonocarro.com.br
-      [init]
-        defaultBranch = main
-      [pull]
-        rebase = true
-      [push]
-        autoSetupRemote = true
-        default = simple
-      [rerere]
-        enabled = true
-      [branch]
-        sort = -committerdate
-      [core]
-        autocrlf = false
-      [diff]
-        colorMoved = default
-    '';
+    etc = {
+      "gitconfig".text = ''
+        [user]
+          name = GabrielFeliciano
+          email = gabriel.feliciano@olhonocarro.com.br
+        [init]
+          defaultBranch = main
+        [pull]
+          rebase = true
+        [push]
+          autoSetupRemote = true
+          default = simple
+        [rerere]
+          enabled = true
+        [branch]
+          sort = -committerdate
+        [core]
+          autocrlf = false
+        [diff]
+          colorMoved = default
+      '';
+
+      "xdg/alacritty/alacritty.toml".text = ''
+        [general]
+        import = ["${pkgs.alacritty-theme.catppuccin_mocha}"]
+
+        [terminal.shell]
+        program = "tmux"
+        args = ["new-session"]
+
+        [[keyboard.bindings]]
+        key = "Return"
+        mods = "Shift"
+        chars = "\u001b\r"
+      '';
+    };
+
     systemPackages = with pkgs; [
       gnumake42
       direnv
-      fzf
       lsof
       socat
       jq
@@ -149,5 +170,11 @@
       git
       television
     ];
+
+    variables = {
+      XDG_CURRENT_DESKTOP = "GNOME";
+      DONT_PROMPT_WSL_INSTALL = "1";
+      GSETTINGS_SCHEMA_DIR = "${pkgs.gtk3}/share/gsettings-schemas/${pkgs.gtk3.name}/glib-2.0/schemas";
+    };
   };
 }
